@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLIZZARD - JETX</title>
+
+<style>
+body{
+    background:#0f172a;
+    font-family:Arial, sans-serif;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+.container{
+    max-width:400px;
+    margin:auto;
+}
+h1{
+    color:#facc15;
+}
+input{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border-radius:8px;
+    border:none;
+}
+button{
+    width:100%;
+    padding:12px;
+    background:#22c55e;
+    border:none;
+    color:white;
+    font-weight:bold;
+    border-radius:8px;
+    cursor:pointer;
+}
+.result{
+    margin-top:15px;
+    padding:15px;
+    background:#dc2626;
+    border-radius:10px;
+    font-size:20px;
+    font-weight:bold;
+}
+.history{
+    margin-top:20px;
+    text-align:left;
+    font-size:14px;
+}
+.history div{
+    background:#1e293b;
+    padding:6px;
+    margin:5px 0;
+    border-radius:6px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>✨ BLIZZARD - JETX ✨</h1>
+
+<label>Heure actuelle</label>
+<input type="text" id="heure" readonly>
+
+<label>Entrer votre Hash</label>
+<input type="text" id="hashInput" placeholder="Collez votre hash ici...">
+
+<button onclick="calculer()">CALCULER PRÉDICTIF</button>
+
+<div class="result" id="resultat">Résultat: ---</div>
+
+<div class="history">
+<h3>Historique</h3>
+<div id="historique"></div>
+</div>
+
+</div>
+
+<script>
+
+// Mise à jour automatique heure
+function updateHeure(){
+    const now = new Date();
+    document.getElementById("heure").value =
+        now.toLocaleTimeString();
+}
+setInterval(updateHeure,1000);
+updateHeure();
+
+// SHA-256 FUNCTION
+async function sha256(message){
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function calculer(){
+
+    const hashUser = document.getElementById("hashInput").value;
+    const heure = document.getElementById("heure").value;
+
+    if(hashUser === ""){
+        alert("Ampidiro ny hash!");
+        return;
+    }
+
+    // Combine hash + heure
+    const combinaison = hashUser + heure;
+
+    // SHA-256 tena izy
+    const hashed = await sha256(combinaison);
+
+    // Maka partie amin'ny hash
+    const valeurHex = hashed.substring(0,8);
+
+    // Avadika decimal
+    const valeurNum = parseInt(valeurHex,16);
+
+    // Mamorona résultat (1.00 - 10.00 ohatra)
+    const resultatFinal = ((valeurNum % 900) / 100 + 1).toFixed(2);
+
+    document.getElementById("resultat").innerHTML =
+        "Résultat: " + resultatFinal + "x";
+
+    ajouterHistorique(resultatFinal + "x");
+}
+
+function ajouterHistorique(val){
+    const histDiv = document.getElementById("historique");
+    const newItem = document.createElement("div");
+    newItem.textContent = new Date().toLocaleTimeString() + " → " + val;
+    histDiv.prepend(newItem);
+}
+
+</script>
+
+</body>
+</html>
