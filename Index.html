@@ -2,42 +2,177 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Calculator Hash Heure</title>
+<title>M.H.S Calculator Pro</title>
+
 <style>
-body { font-family: Arial; text-align:center; background:#111; color:white; }
-input, button { padding:10px; margin:5px; width:80%; }
-button { background:lime; border:none; }
-.result { margin-top:20px; font-size:22px; color:yellow; }
+body{
+    background:#0e0e0e;
+    font-family:Arial;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+.title{
+    font-size:20px;
+    margin-bottom:20px;
+    letter-spacing:2px;
+}
+
+.label{
+    text-align:left;
+    width:90%;
+    margin:auto;
+    color:#ffd000;
+    font-weight:bold;
+    margin-top:15px;
+}
+
+/* Heure boxes */
+.time-container{
+    width:90%;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+}
+
+.time-box{
+    width:30%;
+    padding:15px;
+    background:#1b1f24;
+    border:2px solid #ffd000;
+    border-radius:10px;
+    font-size:22px;
+    color:white;
+    text-align:center;
+}
+
+/* Hash */
+.hash-box{
+    width:90%;
+    margin:10px auto;
+    padding:15px;
+    background:#1b1f24;
+    border:2px solid #ffd000;
+    border-radius:10px;
+    font-size:16px;
+    color:white;
+}
+
+/* Buttons */
+.btn-green{
+    width:90%;
+    padding:15px;
+    background:#00c853;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    margin-top:15px;
+}
+
+.btn-red{
+    width:90%;
+    padding:15px;
+    background:#d50000;
+    border:none;
+    border-radius:10px;
+    font-size:20px;
+    font-weight:bold;
+    margin-top:20px;
+    color:white;
+}
+
+/* Historique */
+.history{
+    width:90%;
+    margin:20px auto;
+    background:#1b1f24;
+    padding:10px;
+    border-radius:10px;
+    text-align:left;
+}
+
+.history h3{
+    color:#ffd000;
+}
+
+.history-item{
+    padding:5px;
+    border-bottom:1px solid #333;
+}
 </style>
 </head>
+
 <body>
 
-<h2>Hash + Heure Calculator</h2>
+<div class="title">BY KUMA - M.H.S. CALCULATOR</div>
 
-<input id="hash" placeholder="Ampidiro HASH">
-<input id="heure" placeholder="Ampidiro Heure (01:32:23)">
+<div class="label">🕒 HEURE DE DÉPART (H / M / S)</div>
+<div class="time-container">
+    <input class="time-box" id="hour" placeholder="H">
+    <input class="time-box" id="minute" placeholder="M">
+    <input class="time-box" id="second" placeholder="S">
+</div>
 
-<button onclick="calculer()">CALCULER</button>
+<div class="label"># HASH</div>
+<textarea class="hash-box" id="hash" rows="3" placeholder="Ampidiro HASH eto"></textarea>
 
-<div class="result" id="resultat"></div>
+<button class="btn-green" onclick="calculer()">⚡ CALCULER M.H.S.</button>
+
+<button class="btn-red" id="resultBtn">résultats final</button>
+
+<div class="history">
+    <h3>Historique</h3>
+    <div id="historyList"></div>
+</div>
 
 <script>
-function calculer(){
-    let hash = document.getElementById("hash").value;
-    let heure = document.getElementById("heure").value;
 
-    if(hash == "" || heure == ""){
+let historyArray = [];
+
+function calculer(){
+
+    let h = document.getElementById("hour").value;
+    let m = document.getElementById("minute").value;
+    let s = document.getElementById("second").value;
+    let hash = document.getElementById("hash").value;
+
+    if(h=="" || m=="" || s=="" || hash==""){
         alert("Fenoy daholo!");
         return;
     }
 
-    // Exemple formule tsotra (demo)
-    let valeur = hash.length + heure.length;
-    let resultat = (valeur % 10 + 1) + "." + (valeur % 99);
+    let heureFormat = h.padStart(2,'0') + ":" +
+                      m.padStart(2,'0') + ":" +
+                      s.padStart(2,'0');
 
-    document.getElementById("resultat").innerHTML = 
-    "RESULTAT FINAL : " + resultat + "x";
+    // Calcul demo (résultat anaky 5)
+    let total = hash.length + parseInt(h) + parseInt(m) + parseInt(s);
+    let result = ((total % 5)+1)*5;
+
+    document.getElementById("resultBtn").innerHTML =
+        "RÉSULTATS FINAL : " + result + "x";
+
+    addHistory(heureFormat + " → " + result + "x");
 }
+
+function addHistory(value){
+
+    historyArray.unshift(value);
+
+    if(historyArray.length > 10){
+        historyArray.pop();
+    }
+
+    let list = document.getElementById("historyList");
+    list.innerHTML = "";
+
+    historyArray.forEach(function(item){
+        list.innerHTML += "<div class='history-item'>" + item + "</div>";
+    });
+}
+
 </script>
 
 </body>
