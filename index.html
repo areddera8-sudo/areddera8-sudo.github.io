@@ -2,76 +2,128 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crash Style Calculator</title>
+<title>M.H.S Calculator Pro</title>
+
 <style>
 body{
-    background:#0f0f0f;
+    background:#0e0e0e;
     font-family:Arial;
+    color:white;
     text-align:center;
-    color:white;
-}
-h2{ color:#00ff66; }
-
-input{
-    width:80%;
-    padding:12px;
-    margin:8px;
-    background:#1c1c1c;
-    border:1px solid #00ff66;
-    color:white;
-    border-radius:5px;
+    padding:20px;
 }
 
-button{
-    width:85%;
-    padding:12px;
-    margin-top:10px;
-    background:#00ff66;
-    border:none;
-    font-weight:bold;
-    border-radius:5px;
+.title{
+    font-size:20px;
+    margin-bottom:20px;
+    letter-spacing:2px;
 }
 
-.result{
-    margin-top:30px;
-    font-size:40px;
-    font-weight:bold;
-    color:#00ff66;
-}
-
-.history{
-    margin-top:30px;
+.label{
+    text-align:left;
     width:90%;
-    margin-left:auto;
-    margin-right:auto;
-    background:#1c1c1c;
+    margin:auto;
+    color:#ffd000;
+    font-weight:bold;
+    margin-top:15px;
+}
+
+/* Heure boxes */
+.time-container{
+    width:90%;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+}
+
+.time-box{
+    width:30%;
     padding:15px;
-    border-radius:8px;
+    background:#1b1f24;
+    border:2px solid #ffd000;
+    border-radius:10px;
+    font-size:22px;
+    color:white;
+    text-align:center;
+}
+
+/* Hash */
+.hash-box{
+    width:90%;
+    margin:10px auto;
+    padding:15px;
+    background:#1b1f24;
+    border:2px solid #ffd000;
+    border-radius:10px;
+    font-size:16px;
+    color:white;
+}
+
+/* Buttons */
+.btn-green{
+    width:90%;
+    padding:15px;
+    background:#00c853;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    margin-top:15px;
+}
+
+.btn-red{
+    width:90%;
+    padding:15px;
+    background:#d50000;
+    border:none;
+    border-radius:10px;
+    font-size:20px;
+    font-weight:bold;
+    margin-top:20px;
+    color:white;
+}
+
+/* Historique */
+.history{
+    width:90%;
+    margin:20px auto;
+    background:#1b1f24;
+    padding:10px;
+    border-radius:10px;
+    text-align:left;
 }
 
 .history h3{
-    color:#00ff66;
+    color:#ffd000;
 }
 
 .history-item{
-    padding:6px;
+    padding:5px;
     border-bottom:1px solid #333;
 }
 </style>
 </head>
+
 <body>
 
-<h2>HASH + HEURE CALCULATOR</h2>
+<div class="title">BY KUMA - M.H.S. CALCULATOR</div>
 
-<input id="hash" placeholder="Ampidiro HASH">
-<input id="heure" placeholder="Ampidiro Heure (01:32:23)">
+<div class="label">🕒 HEURE DE DÉPART (H / M / S)</div>
+<div class="time-container">
+    <input class="time-box" id="hour" placeholder="H">
+    <input class="time-box" id="minute" placeholder="M">
+    <input class="time-box" id="second" placeholder="S">
+</div>
 
-<button onclick="startCalc()">CALCULER</button>
+<div class="label"># HASH</div>
+<textarea class="hash-box" id="hash" rows="3" placeholder="Ampidiro HASH eto"></textarea>
 
-<div class="result" id="resultat">0.00x</div>
+<button class="btn-green" onclick="calculer()">⚡ CALCULER M.H.S.</button>
+
+<button class="btn-red" id="resultBtn">résultats final</button>
 
 <div class="history">
-    <h3>Historique Résultats</h3>
+    <h3>Historique</h3>
     <div id="historyList"></div>
 </div>
 
@@ -79,36 +131,33 @@ button{
 
 let historyArray = [];
 
-function startCalc(){
+function calculer(){
 
+    let h = document.getElementById("hour").value;
+    let m = document.getElementById("minute").value;
+    let s = document.getElementById("second").value;
     let hash = document.getElementById("hash").value;
-    let heure = document.getElementById("heure").value;
 
-    if(hash=="" || heure==""){
+    if(h=="" || m=="" || s=="" || hash==""){
         alert("Fenoy daholo!");
         return;
     }
 
-    let total = hash.length + heure.replace(/:/g,"").length;
-    let finalValue = ((total % 7) + 1) + Math.random();
-    finalValue = finalValue.toFixed(2);
+    let heureFormat = h.padStart(2,'0') + ":" +
+                      m.padStart(2,'0') + ":" +
+                      s.padStart(2,'0');
 
-    let display = document.getElementById("resultat");
-    let current = 0;
+    // Calcul demo (résultat anaky 5)
+    let total = hash.length + parseInt(h) + parseInt(m) + parseInt(s);
+    let result = ((total % 5)+1)*5;
 
-    let interval = setInterval(function(){
-        current += 0.05;
-        display.innerHTML = current.toFixed(2) + "x";
+    document.getElementById("resultBtn").innerHTML =
+        "RÉSULTATS FINAL : " + result + "x";
 
-        if(current >= finalValue){
-            clearInterval(interval);
-            display.innerHTML = finalValue + "x";
-            addToHistory(finalValue + "x");
-        }
-    },30);
+    addHistory(heureFormat + " → " + result + "x");
 }
 
-function addToHistory(value){
+function addHistory(value){
 
     historyArray.unshift(value);
 
@@ -116,11 +165,11 @@ function addToHistory(value){
         historyArray.pop();
     }
 
-    let historyList = document.getElementById("historyList");
-    historyList.innerHTML = "";
+    let list = document.getElementById("historyList");
+    list.innerHTML = "";
 
     historyArray.forEach(function(item){
-        historyList.innerHTML += "<div class='history-item'>" + item + "</div>";
+        list.innerHTML += "<div class='history-item'>" + item + "</div>";
     });
 }
 
