@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>BY DERA - CRASH TIME PRO</title>
+<title>BY DERA - SMART ENGINE</title>
 
 <style>
 body{
@@ -32,7 +32,7 @@ body{
     border:2px solid #ffd000;
     border-radius:10px;
     color:white;
-    font-size:18px;
+    font-size:16px;
     text-align:center;
 }
 
@@ -72,13 +72,13 @@ body{
 
 <body>
 
-<div class="title">BY DERA - CRASH TIME PRO</div>
+<div class="title">BY DERA - SMART ENGINE</div>
 
 <div class="label">🕒 HEURE (HH:MM:SS)</div>
 <input class="box" id="heure" placeholder="01:31:57">
 
-<div class="label">⏱ Durée Tour (minutes)</div>
-<input class="box" id="duration" placeholder="2">
+<div class="label"># HASH</div>
+<input class="box" id="hash" placeholder="abc123xyz">
 
 <button class="btn" onclick="calculate()">⚡ CALCULER</button>
 
@@ -98,24 +98,36 @@ Résultat : - <br>Heure finale : -
 let historyArray = [];
 let countdownInterval;
 
-function generateResult(){
+// 🔥 Mélange HASH + HEURE
+function mixHashTime(hash, time){
 
-    // Random between 2.01 and 1000
-    let value = (Math.random() * (1000 - 2.01)) + 2.01;
-    return value.toFixed(2);
+    let combined = hash + time;
+    let total = 0;
+
+    for(let i=0;i<combined.length;i++){
+        total = (total * 31 + combined.charCodeAt(i)) % 1000000007;
+    }
+
+    return total;
 }
 
 function calculate(){
 
     let timeInput = document.getElementById("heure").value;
-    let duration = parseInt(document.getElementById("duration").value);
+    let hash = document.getElementById("hash").value;
 
-    if(timeInput=="" || isNaN(duration)){
+    if(timeInput=="" || hash==""){
         alert("Fenoy daholo!");
         return;
     }
 
-    let resultValue = generateResult();
+    let engineValue = mixHashTime(hash, timeInput);
+
+    // 🎯 Résultat [2.01 – 1000]
+    let resultValue = (2.01 + (engineValue % 997.99)).toFixed(2);
+
+    // ⏱ Durée tour (15 sec → 180 sec)
+    let durationSeconds = (engineValue % 165) + 15;
 
     let parts = timeInput.split(":");
 
@@ -124,7 +136,7 @@ function calculate(){
     baseDate.setMinutes(parts[1]);
     baseDate.setSeconds(parts[2]);
 
-    let nextDate = new Date(baseDate.getTime() + duration*60000);
+    let nextDate = new Date(baseDate.getTime() + durationSeconds*1000);
 
     let nextTime =
         nextDate.getHours().toString().padStart(2,'0') + ":" +
@@ -133,6 +145,7 @@ function calculate(){
 
     document.getElementById("resultBox").innerHTML =
         "Résultat : " + resultValue + "x" +
+        "<br>Durée tour : " + durationSeconds + " sec" +
         "<br>Heure tour manaraka : " + nextTime;
 
     addHistory(resultValue + "x → " + nextTime);
