@@ -185,50 +185,39 @@ function startGame(){
         if(current >= finalValue){
             clearInterval(interval);
             multiplierDisplay.innerHTML = finalValue + "x";
-            afterCrash(heureInput, finalValue);
+            afterCrash(finalValue);
         }
 
     },30);
 }
 
-function afterCrash(heureInput, result){
+function afterCrash(result){
 
-    // ===== Tour manaraka +2 min =====
-    let parts = heureInput.split(":");
-    let date = new Date();
-    date.setHours(parts[0]);
-    date.setMinutes(parts[1]);
-    date.setSeconds(parts[2]);
-    date.setMinutes(date.getMinutes() + 2);
+    // ===== Tour manaraka EXACT +2 minutes (miaraka seconde) =====
+    let now = new Date();
+    let nextDate = new Date(now.getTime() + 2 * 60000);
 
     let nextTime =
-        date.getHours().toString().padStart(2,'0') + ":" +
-        date.getMinutes().toString().padStart(2,'0') + ":" +
-        date.getSeconds().toString().padStart(2,'0');
+        nextDate.getHours().toString().padStart(2,'0') + ":" +
+        nextDate.getMinutes().toString().padStart(2,'0') + ":" +
+        nextDate.getSeconds().toString().padStart(2,'0');
 
     document.getElementById("resultBox").innerHTML =
         "Résultat final : " + result + "x<br>Tour manaraka : " + nextTime;
 
-    addHistory(heureInput + " → " + result + "x (" + nextTime + ")");
+    addHistory(result + "x → " + nextTime);
 
-    startCountdown(nextTime);
+    startCountdown(nextDate);
 }
 
-function startCountdown(targetTime){
+function startCountdown(targetDate){
 
     clearInterval(countdownInterval);
 
     countdownInterval = setInterval(function(){
 
         let now = new Date();
-        let parts = targetTime.split(":");
-
-        let target = new Date();
-        target.setHours(parts[0]);
-        target.setMinutes(parts[1]);
-        target.setSeconds(parts[2]);
-
-        let diff = Math.floor((target - now)/1000);
+        let diff = Math.floor((targetDate - now)/1000);
 
         if(diff <= 0){
             document.getElementById("countdown").innerHTML =
@@ -237,8 +226,11 @@ function startCountdown(targetTime){
             return;
         }
 
+        let minutes = Math.floor(diff / 60);
+        let seconds = diff % 60;
+
         document.getElementById("countdown").innerHTML =
-            "Countdown: " + diff + " sec";
+            "Countdown: " + minutes + "m " + seconds + "s";
 
     },1000);
 }
