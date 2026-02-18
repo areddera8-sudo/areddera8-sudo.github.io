@@ -14,10 +14,7 @@ body{
     padding:15px;
 }
 
-.title{
-    font-size:20px;
-    margin-bottom:15px;
-}
+.title{font-size:20px;margin-bottom:15px;}
 
 .label{
     color:#ffd000;
@@ -27,7 +24,7 @@ body{
     margin-top:10px;
 }
 
-.box{
+.box,.hash-box{
     width:90%;
     padding:12px;
     margin:8px auto;
@@ -37,16 +34,6 @@ body{
     color:white;
     font-size:18px;
     text-align:center;
-}
-
-.hash-box{
-    width:90%;
-    padding:12px;
-    margin:8px auto;
-    background:#1b1f24;
-    border:2px solid #ffd000;
-    border-radius:10px;
-    color:white;
 }
 
 .btn{
@@ -101,10 +88,7 @@ canvas{
     border-radius:10px;
     text-align:left;
 }
-
-.history h3{
-    color:#ffd000;
-}
+.history h3{color:#ffd000;}
 </style>
 </head>
 
@@ -112,11 +96,14 @@ canvas{
 
 <div class="title">BY DERA - M.H.S PRO</div>
 
-<div class="label">🕒 HEURE DE DÉPART</div>
+<div class="label">🕒 HEURE (HH:MM:SS)</div>
 <input class="box" id="heure" placeholder="01:31:57">
 
 <div class="label"># HASH</div>
 <textarea class="hash-box" id="hash" rows="2"></textarea>
+
+<div class="label">🎯 RÉSULTAT (optionnel)</div>
+<input class="box" id="manualResult" placeholder="Ex: 25">
 
 <button class="btn" onclick="startGame()">⚡ CALCULER</button>
 
@@ -150,17 +137,33 @@ function startGame(){
 
     let heureInput = document.getElementById("heure").value;
     let hash = document.getElementById("hash").value;
+    let manualResult = document.getElementById("manualResult").value;
 
-    if(heureInput=="" || hash==""){
-        alert("Fenoy daholo!");
+    if(heureInput==""){
+        alert("Ampidiro ny heure!");
         return;
     }
 
-    // ===== Résultat anaky 5 =====
-    let total = hash.length + heureInput.length;
-    let finalValue = ((total % 5)+1)*5;
+    let finalValue;
 
-    // ===== Graph Crash =====
+    // ===== Raha misy résultat ampidirina =====
+    if(manualResult != ""){
+        finalValue = parseFloat(manualResult);
+    }else{
+        // ===== Auto calcul miovaova =====
+        let mix = hash + heureInput + Date.now();
+        let sum = 0;
+        for(let i=0;i<mix.length;i++){
+            sum += mix.charCodeAt(i);
+        }
+        finalValue = (sum % 50) + 5; // miova foana
+    }
+
+    runCrash(finalValue, heureInput);
+}
+
+function runCrash(finalValue, heureInput){
+
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.beginPath();
     ctx.moveTo(0, canvas.height);
@@ -171,10 +174,10 @@ function startGame(){
 
     let interval = setInterval(function(){
 
-        current += 0.3;
+        current += 0.4;
         x += 5;
 
-        let y = canvas.height - (current * 6);
+        let y = canvas.height - (current * 5);
 
         ctx.lineTo(x,y);
         ctx.strokeStyle = "#00ff66";
@@ -184,18 +187,22 @@ function startGame(){
 
         if(current >= finalValue){
             clearInterval(interval);
-            multiplierDisplay.innerHTML = finalValue + "x";
-            afterCrash(finalValue);
+            multiplierDisplay.innerHTML = finalValue.toFixed(1) + "x";
+            afterCrash(finalValue, heureInput);
         }
 
     },30);
 }
 
-function afterCrash(result){
+function afterCrash(result, heureInput){
 
-    // ===== Tour manaraka EXACT +2 minutes (miaraka seconde) =====
-    let now = new Date();
-    let nextDate = new Date(now.getTime() + 2 * 60000);
+    let parts = heureInput.split(":");
+    let baseDate = new Date();
+    baseDate.setHours(parts[0]);
+    baseDate.setMinutes(parts[1]);
+    baseDate.setSeconds(parts[2]);
+
+    let nextDate = new Date(baseDate.getTime() + 2*60000);
 
     let nextTime =
         nextDate.getHours().toString().padStart(2,'0') + ":" +
@@ -203,9 +210,9 @@ function afterCrash(result){
         nextDate.getSeconds().toString().padStart(2,'0');
 
     document.getElementById("resultBox").innerHTML =
-        "Résultat final : " + result + "x<br>Tour manaraka : " + nextTime;
+        "Résultat final : " + result.toFixed(1) + "x<br>Tour manaraka : " + nextTime;
 
-    addHistory(result + "x → " + nextTime);
+    addHistory(result.toFixed(1) + "x → " + nextTime);
 
     startCountdown(nextDate);
 }
@@ -238,10 +245,7 @@ function startCountdown(targetDate){
 function addHistory(value){
 
     historyArray.unshift(value);
-
-    if(historyArray.length > 10){
-        historyArray.pop();
-    }
+    if(historyArray.length > 10){ historyArray.pop(); }
 
     let list = document.getElementById("historyList");
     list.innerHTML = "";
