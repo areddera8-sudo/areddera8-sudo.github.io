@@ -1,194 +1,133 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>BY DERA - SMART ENGINE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>blizzard.jetx</title>
 
 <style>
 body{
-    background:#0e0e0e;
-    font-family:Arial;
+    background:#0d0d0d;
+    font-family:Arial, sans-serif;
     color:white;
     text-align:center;
-    margin:0;
-    padding:15px;
+    padding:20px;
 }
-
-.title{font-size:20px;margin-bottom:15px;}
-
-.label{
-    color:#ffd000;
-    text-align:left;
-    width:90%;
+.container{
+    max-width:400px;
     margin:auto;
-    margin-top:10px;
 }
-
-.box{
-    width:90%;
+h1{
+    color:#ffd700;
+}
+input{
+    width:100%;
     padding:12px;
-    margin:8px auto;
-    background:#1b1f24;
-    border:2px solid #ffd000;
-    border-radius:10px;
+    margin:10px 0;
+    border:none;
+    border-radius:8px;
+    background:#1a1a1a;
     color:white;
     font-size:16px;
-    text-align:center;
 }
-
-.btn{
-    width:90%;
+button{
+    width:100%;
     padding:14px;
-    background:#00c853;
     border:none;
-    border-radius:10px;
-    font-weight:bold;
-    margin-top:10px;
-}
-
-.result{
-    background:#d50000;
-    padding:12px;
-    margin-top:15px;
-    border-radius:10px;
-}
-
-.countdown{
-    margin-top:10px;
+    border-radius:8px;
     font-size:18px;
-    color:#00ff66;
+    font-weight:bold;
+    cursor:pointer;
 }
-
-.history{
-    margin-top:15px;
-    background:#1b1f24;
-    padding:10px;
+.calc{
+    background:#00c853;
+    color:black;
+}
+.result{
+    margin-top:20px;
+    padding:20px;
+    background:#b71c1c;
     border-radius:10px;
-    text-align:left;
+    font-size:28px;
+    font-weight:bold;
 }
-.history h3{color:#ffd000;}
+.history{
+    margin-top:20px;
+    text-align:left;
+    font-size:14px;
+}
+.history div{
+    background:#1a1a1a;
+    padding:8px;
+    margin:5px 0;
+    border-radius:6px;
+}
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<div class="title">BY DERA - SMART ENGINE</div>
+<h1>✨ BLIZZARD - JETX ✨</h1>
 
-<div class="label">🕒 HEURE (HH:MM:SS)</div>
-<input class="box" id="heure" placeholder="01:31:57">
+<label>Heure de départ</label>
+<input type="time" id="heure">
 
-<div class="label"># HASH</div>
-<input class="box" id="hash" placeholder="abc123xyz">
+<label>Hash</label>
+<input type="text" id="hash" placeholder="Collez votre hash ici">
 
-<button class="btn" onclick="calculate()">⚡ CALCULER</button>
+<label>Tour</label>
+<input type="number" id="tour" value="1">
 
-<div class="result" id="resultBox">
-Résultat : - <br>Heure finale : -
+<button class="calc" onclick="calculer()">CALCULER PRÉDICTIF</button>
+
+<div class="result" id="resultat">--</div>
+
+<div class="history" id="history">
+<h3>Historique</h3>
 </div>
 
-<div class="countdown" id="countdown"></div>
-
-<div class="history">
-<h3>Historique</h3>
-<div id="historyList"></div>
 </div>
 
 <script>
 
-let historyArray = [];
-let countdownInterval;
-
-// 🔥 Mélange HASH + HEURE
-function mixHashTime(hash, time){
-
-    let combined = hash + time;
-    let total = 0;
-
-    for(let i=0;i<combined.length;i++){
-        total = (total * 31 + combined.charCodeAt(i)) % 1000000007;
-    }
-
-    return total;
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function calculate(){
+async function calculer(){
 
-    let timeInput = document.getElementById("heure").value;
+    let heure = document.getElementById("heure").value;
     let hash = document.getElementById("hash").value;
+    let tour = document.getElementById("tour").value;
 
-    if(timeInput=="" || hash==""){
-        alert("Fenoy daholo!");
+    if(!heure || !hash){
+        alert("Remplissez tous les champs !");
         return;
     }
 
-    let engineValue = mixHashTime(hash, timeInput);
+    let combine = hash + heure + tour;
 
-    // 🎯 Résultat [2.01 – 1000]
-    let resultValue = (2.01 + (engineValue % 997.99)).toFixed(2);
+    let hashFinal = await sha256(combine);
 
-    // ⏱ Durée tour (15 sec → 180 sec)
-    let durationSeconds = (engineValue % 165) + 15;
+    let number = parseInt(hashFinal.substring(0,12),16);
 
-    let parts = timeInput.split(":");
+    let result = (number % 100000) / 100;
 
-    let baseDate = new Date();
-    baseDate.setHours(parts[0]);
-    baseDate.setMinutes(parts[1]);
-    baseDate.setSeconds(parts[2]);
+    if(result < 1.01) result = 1.01;
+    if(result > 1000) result = 1000;
 
-    let nextDate = new Date(baseDate.getTime() + durationSeconds*1000);
+    result = result.toFixed(2) + "x";
 
-    let nextTime =
-        nextDate.getHours().toString().padStart(2,'0') + ":" +
-        nextDate.getMinutes().toString().padStart(2,'0') + ":" +
-        nextDate.getSeconds().toString().padStart(2,'0');
+    document.getElementById("resultat").innerText = result;
 
-    document.getElementById("resultBox").innerHTML =
-        "Résultat : " + resultValue + "x" +
-        "<br>Durée tour : " + durationSeconds + " sec" +
-        "<br>Heure tour manaraka : " + nextTime;
-
-    addHistory(resultValue + "x → " + nextTime);
-
-    startCountdown(nextDate);
-}
-
-function startCountdown(targetDate){
-
-    clearInterval(countdownInterval);
-
-    countdownInterval = setInterval(function(){
-
-        let now = new Date();
-        let diff = Math.floor((targetDate - now)/1000);
-
-        if(diff <= 0){
-            document.getElementById("countdown").innerHTML =
-                "🚀 Tour manaraka izao!";
-            clearInterval(countdownInterval);
-            return;
-        }
-
-        let minutes = Math.floor(diff / 60);
-        let seconds = diff % 60;
-
-        document.getElementById("countdown").innerHTML =
-            "Countdown: " + minutes + "m " + seconds + "s";
-
-    },1000);
-}
-
-function addHistory(value){
-
-    historyArray.unshift(value);
-    if(historyArray.length > 10){ historyArray.pop(); }
-
-    let list = document.getElementById("historyList");
-    list.innerHTML = "";
-
-    historyArray.forEach(function(item){
-        list.innerHTML += "<div>"+item+"</div>";
-    });
+    let historyDiv = document.getElementById("history");
+    let newEntry = document.createElement("div");
+    newEntry.innerText = heure + " | Tour " + tour + " → " + result;
+    historyDiv.appendChild(newEntry);
 }
 
 </script>
