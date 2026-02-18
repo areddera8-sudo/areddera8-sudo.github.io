@@ -1,9 +1,130 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mon Site</title>
+<meta charset="UTF-8">
+<title>Crash Style Calculator</title>
+<style>
+body{
+    background:#0f0f0f;
+    font-family:Arial;
+    text-align:center;
+    color:white;
+}
+h2{ color:#00ff66; }
+
+input{
+    width:80%;
+    padding:12px;
+    margin:8px;
+    background:#1c1c1c;
+    border:1px solid #00ff66;
+    color:white;
+    border-radius:5px;
+}
+
+button{
+    width:85%;
+    padding:12px;
+    margin-top:10px;
+    background:#00ff66;
+    border:none;
+    font-weight:bold;
+    border-radius:5px;
+}
+
+.result{
+    margin-top:30px;
+    font-size:40px;
+    font-weight:bold;
+    color:#00ff66;
+}
+
+.history{
+    margin-top:30px;
+    width:90%;
+    margin-left:auto;
+    margin-right:auto;
+    background:#1c1c1c;
+    padding:15px;
+    border-radius:8px;
+}
+
+.history h3{
+    color:#00ff66;
+}
+
+.history-item{
+    padding:6px;
+    border-bottom:1px solid #333;
+}
+</style>
 </head>
 <body>
-  <h1>Salama eto amin'ny site-ko 🚀</h1>
+
+<h2>HASH + HEURE CALCULATOR</h2>
+
+<input id="hash" placeholder="Ampidiro HASH">
+<input id="heure" placeholder="Ampidiro Heure (01:32:23)">
+
+<button onclick="startCalc()">CALCULER</button>
+
+<div class="result" id="resultat">0.00x</div>
+
+<div class="history">
+    <h3>Historique Résultats</h3>
+    <div id="historyList"></div>
+</div>
+
+<script>
+
+let historyArray = [];
+
+function startCalc(){
+
+    let hash = document.getElementById("hash").value;
+    let heure = document.getElementById("heure").value;
+
+    if(hash=="" || heure==""){
+        alert("Fenoy daholo!");
+        return;
+    }
+
+    let total = hash.length + heure.replace(/:/g,"").length;
+    let finalValue = ((total % 7) + 1) + Math.random();
+    finalValue = finalValue.toFixed(2);
+
+    let display = document.getElementById("resultat");
+    let current = 0;
+
+    let interval = setInterval(function(){
+        current += 0.05;
+        display.innerHTML = current.toFixed(2) + "x";
+
+        if(current >= finalValue){
+            clearInterval(interval);
+            display.innerHTML = finalValue + "x";
+            addToHistory(finalValue + "x");
+        }
+    },30);
+}
+
+function addToHistory(value){
+
+    historyArray.unshift(value);
+
+    if(historyArray.length > 10){
+        historyArray.pop();
+    }
+
+    let historyList = document.getElementById("historyList");
+    historyList.innerHTML = "";
+
+    historyArray.forEach(function(item){
+        historyList.innerHTML += "<div class='history-item'>" + item + "</div>";
+    });
+}
+
+</script>
+
 </body>
 </html>
