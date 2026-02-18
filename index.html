@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>BY DERA - M.H.S PRO</title>
+<title>BY DERA - CRASH TIME PRO</title>
 
 <style>
 body{
@@ -24,7 +24,7 @@ body{
     margin-top:10px;
 }
 
-.box,.hash-box{
+.box{
     width:90%;
     padding:12px;
     margin:8px auto;
@@ -44,28 +44,6 @@ body{
     border-radius:10px;
     font-weight:bold;
     margin-top:10px;
-}
-
-#graphContainer{
-    width:100%;
-    height:250px;
-    background:#111;
-    margin-top:15px;
-    position:relative;
-}
-
-#multiplier{
-    position:absolute;
-    top:35%;
-    width:100%;
-    font-size:40px;
-    color:#00ff66;
-}
-
-canvas{
-    position:absolute;
-    bottom:0;
-    left:0;
 }
 
 .result{
@@ -94,26 +72,18 @@ canvas{
 
 <body>
 
-<div class="title">BY DERA - M.H.S PRO</div>
+<div class="title">BY DERA - CRASH TIME PRO</div>
 
 <div class="label">🕒 HEURE (HH:MM:SS)</div>
 <input class="box" id="heure" placeholder="01:31:57">
 
-<div class="label"># HASH</div>
-<textarea class="hash-box" id="hash" rows="2"></textarea>
+<div class="label">⏱ Durée Tour (minutes)</div>
+<input class="box" id="duration" placeholder="2">
 
-<div class="label">🎯 RÉSULTAT (optionnel)</div>
-<input class="box" id="manualResult" placeholder="Ex: 25">
-
-<button class="btn" onclick="startGame()">⚡ CALCULER</button>
-
-<div id="graphContainer">
-    <div id="multiplier">0x</div>
-    <canvas id="graph"></canvas>
-</div>
+<button class="btn" onclick="calculate()">⚡ CALCULER</button>
 
 <div class="result" id="resultBox">
-Résultat final : -
+Résultat : - <br>Heure finale : -
 </div>
 
 <div class="countdown" id="countdown"></div>
@@ -125,84 +95,36 @@ Résultat final : -
 
 <script>
 
-let canvas = document.getElementById("graph");
-let ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = 250;
-
 let historyArray = [];
 let countdownInterval;
 
-function startGame(){
+function generateResult(){
 
-    let heureInput = document.getElementById("heure").value;
-    let hash = document.getElementById("hash").value;
-    let manualResult = document.getElementById("manualResult").value;
+    // Random between 2.01 and 1000
+    let value = (Math.random() * (1000 - 2.01)) + 2.01;
+    return value.toFixed(2);
+}
 
-    if(heureInput==""){
-        alert("Ampidiro ny heure!");
+function calculate(){
+
+    let timeInput = document.getElementById("heure").value;
+    let duration = parseInt(document.getElementById("duration").value);
+
+    if(timeInput=="" || isNaN(duration)){
+        alert("Fenoy daholo!");
         return;
     }
 
-    let finalValue;
+    let resultValue = generateResult();
 
-    // ===== Raha misy résultat ampidirina =====
-    if(manualResult != ""){
-        finalValue = parseFloat(manualResult);
-    }else{
-        // ===== Auto calcul miovaova =====
-        let mix = hash + heureInput + Date.now();
-        let sum = 0;
-        for(let i=0;i<mix.length;i++){
-            sum += mix.charCodeAt(i);
-        }
-        finalValue = (sum % 50) + 5; // miova foana
-    }
+    let parts = timeInput.split(":");
 
-    runCrash(finalValue, heureInput);
-}
-
-function runCrash(finalValue, heureInput){
-
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height);
-
-    let current = 0;
-    let x = 0;
-    let multiplierDisplay = document.getElementById("multiplier");
-
-    let interval = setInterval(function(){
-
-        current += 0.4;
-        x += 5;
-
-        let y = canvas.height - (current * 5);
-
-        ctx.lineTo(x,y);
-        ctx.strokeStyle = "#00ff66";
-        ctx.stroke();
-
-        multiplierDisplay.innerHTML = current.toFixed(1) + "x";
-
-        if(current >= finalValue){
-            clearInterval(interval);
-            multiplierDisplay.innerHTML = finalValue.toFixed(1) + "x";
-            afterCrash(finalValue, heureInput);
-        }
-
-    },30);
-}
-
-function afterCrash(result, heureInput){
-
-    let parts = heureInput.split(":");
     let baseDate = new Date();
     baseDate.setHours(parts[0]);
     baseDate.setMinutes(parts[1]);
     baseDate.setSeconds(parts[2]);
 
-    let nextDate = new Date(baseDate.getTime() + 2*60000);
+    let nextDate = new Date(baseDate.getTime() + duration*60000);
 
     let nextTime =
         nextDate.getHours().toString().padStart(2,'0') + ":" +
@@ -210,9 +132,10 @@ function afterCrash(result, heureInput){
         nextDate.getSeconds().toString().padStart(2,'0');
 
     document.getElementById("resultBox").innerHTML =
-        "Résultat final : " + result.toFixed(1) + "x<br>Tour manaraka : " + nextTime;
+        "Résultat : " + resultValue + "x" +
+        "<br>Heure tour manaraka : " + nextTime;
 
-    addHistory(result.toFixed(1) + "x → " + nextTime);
+    addHistory(resultValue + "x → " + nextTime);
 
     startCountdown(nextDate);
 }
