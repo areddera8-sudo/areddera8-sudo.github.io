@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>M.H.S Calculator Pro</title>
+<title>BY DERA - M.H.S PRO</title>
 
 <style>
 body{
@@ -10,83 +10,92 @@ body{
     font-family:Arial;
     color:white;
     text-align:center;
-    padding:20px;
+    margin:0;
+    padding:15px;
 }
 
 .title{
     font-size:20px;
-    margin-bottom:20px;
-    letter-spacing:2px;
+    margin-bottom:15px;
 }
 
 .label{
+    color:#ffd000;
     text-align:left;
     width:90%;
     margin:auto;
-    color:#ffd000;
-    font-weight:bold;
-    margin-top:15px;
+    margin-top:10px;
 }
 
-/* Heure boxes */
-.time-container{
+.box{
     width:90%;
-    margin:auto;
-    display:flex;
-    justify-content:space-between;
-}
-
-.time-box{
-    width:30%;
-    padding:15px;
+    padding:12px;
+    margin:8px auto;
     background:#1b1f24;
     border:2px solid #ffd000;
     border-radius:10px;
-    font-size:22px;
     color:white;
+    font-size:18px;
     text-align:center;
 }
 
-/* Hash */
 .hash-box{
     width:90%;
-    margin:10px auto;
-    padding:15px;
+    padding:12px;
+    margin:8px auto;
     background:#1b1f24;
     border:2px solid #ffd000;
     border-radius:10px;
-    font-size:16px;
     color:white;
 }
 
-/* Buttons */
-.btn-green{
+.btn{
     width:90%;
-    padding:15px;
+    padding:14px;
     background:#00c853;
     border:none;
     border-radius:10px;
-    font-size:18px;
     font-weight:bold;
+    margin-top:10px;
+}
+
+#graphContainer{
+    width:100%;
+    height:250px;
+    background:#111;
     margin-top:15px;
+    position:relative;
 }
 
-.btn-red{
-    width:90%;
-    padding:15px;
+#multiplier{
+    position:absolute;
+    top:35%;
+    width:100%;
+    font-size:40px;
+    color:#00ff66;
+}
+
+canvas{
+    position:absolute;
+    bottom:0;
+    left:0;
+}
+
+.result{
     background:#d50000;
-    border:none;
+    padding:12px;
+    margin-top:15px;
     border-radius:10px;
-    font-size:20px;
-    font-weight:bold;
-    margin-top:20px;
-    color:white;
 }
 
-/* Historique */
+.countdown{
+    margin-top:10px;
+    font-size:18px;
+    color:#00ff66;
+}
+
 .history{
-    width:90%;
-    margin:20px auto;
+    margin-top:15px;
     background:#1b1f24;
     padding:10px;
     border-radius:10px;
@@ -96,65 +105,142 @@ body{
 .history h3{
     color:#ffd000;
 }
-
-.history-item{
-    padding:5px;
-    border-bottom:1px solid #333;
-}
 </style>
 </head>
 
 <body>
 
-<div class="title">BY KUMA - M.H.S. CALCULATOR</div>
+<div class="title">BY DERA - M.H.S PRO</div>
 
-<div class="label">🕒 HEURE DE DÉPART (H / M / S)</div>
-<div class="time-container">
-    <input class="time-box" id="hour" placeholder="H">
-    <input class="time-box" id="minute" placeholder="M">
-    <input class="time-box" id="second" placeholder="S">
-</div>
+<div class="label">🕒 HEURE DE DÉPART</div>
+<input class="box" id="heure" placeholder="01:31:57">
 
 <div class="label"># HASH</div>
-<textarea class="hash-box" id="hash" rows="3" placeholder="Ampidiro HASH eto"></textarea>
+<textarea class="hash-box" id="hash" rows="2"></textarea>
 
-<button class="btn-green" onclick="calculer()">⚡ CALCULER M.H.S.</button>
+<button class="btn" onclick="startGame()">⚡ CALCULER</button>
 
-<button class="btn-red" id="resultBtn">résultats final</button>
+<div id="graphContainer">
+    <div id="multiplier">0x</div>
+    <canvas id="graph"></canvas>
+</div>
+
+<div class="result" id="resultBox">
+Résultat final : -
+</div>
+
+<div class="countdown" id="countdown"></div>
 
 <div class="history">
-    <h3>Historique</h3>
-    <div id="historyList"></div>
+<h3>Historique</h3>
+<div id="historyList"></div>
 </div>
 
 <script>
 
+let canvas = document.getElementById("graph");
+let ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = 250;
+
 let historyArray = [];
+let countdownInterval;
 
-function calculer(){
+function startGame(){
 
-    let h = document.getElementById("hour").value;
-    let m = document.getElementById("minute").value;
-    let s = document.getElementById("second").value;
+    let heureInput = document.getElementById("heure").value;
     let hash = document.getElementById("hash").value;
 
-    if(h=="" || m=="" || s=="" || hash==""){
+    if(heureInput=="" || hash==""){
         alert("Fenoy daholo!");
         return;
     }
 
-    let heureFormat = h.padStart(2,'0') + ":" +
-                      m.padStart(2,'0') + ":" +
-                      s.padStart(2,'0');
+    // ===== Résultat anaky 5 =====
+    let total = hash.length + heureInput.length;
+    let finalValue = ((total % 5)+1)*5;
 
-    // Calcul demo (résultat anaky 5)
-    let total = hash.length + parseInt(h) + parseInt(m) + parseInt(s);
-    let result = ((total % 5)+1)*5;
+    // ===== Graph Crash =====
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
 
-    document.getElementById("resultBtn").innerHTML =
-        "RÉSULTATS FINAL : " + result + "x";
+    let current = 0;
+    let x = 0;
+    let multiplierDisplay = document.getElementById("multiplier");
 
-    addHistory(heureFormat + " → " + result + "x");
+    let interval = setInterval(function(){
+
+        current += 0.3;
+        x += 5;
+
+        let y = canvas.height - (current * 6);
+
+        ctx.lineTo(x,y);
+        ctx.strokeStyle = "#00ff66";
+        ctx.stroke();
+
+        multiplierDisplay.innerHTML = current.toFixed(1) + "x";
+
+        if(current >= finalValue){
+            clearInterval(interval);
+            multiplierDisplay.innerHTML = finalValue + "x";
+            afterCrash(heureInput, finalValue);
+        }
+
+    },30);
+}
+
+function afterCrash(heureInput, result){
+
+    // ===== Tour manaraka +2 min =====
+    let parts = heureInput.split(":");
+    let date = new Date();
+    date.setHours(parts[0]);
+    date.setMinutes(parts[1]);
+    date.setSeconds(parts[2]);
+    date.setMinutes(date.getMinutes() + 2);
+
+    let nextTime =
+        date.getHours().toString().padStart(2,'0') + ":" +
+        date.getMinutes().toString().padStart(2,'0') + ":" +
+        date.getSeconds().toString().padStart(2,'0');
+
+    document.getElementById("resultBox").innerHTML =
+        "Résultat final : " + result + "x<br>Tour manaraka : " + nextTime;
+
+    addHistory(heureInput + " → " + result + "x (" + nextTime + ")");
+
+    startCountdown(nextTime);
+}
+
+function startCountdown(targetTime){
+
+    clearInterval(countdownInterval);
+
+    countdownInterval = setInterval(function(){
+
+        let now = new Date();
+        let parts = targetTime.split(":");
+
+        let target = new Date();
+        target.setHours(parts[0]);
+        target.setMinutes(parts[1]);
+        target.setSeconds(parts[2]);
+
+        let diff = Math.floor((target - now)/1000);
+
+        if(diff <= 0){
+            document.getElementById("countdown").innerHTML =
+                "🚀 Tour manaraka izao!";
+            clearInterval(countdownInterval);
+            return;
+        }
+
+        document.getElementById("countdown").innerHTML =
+            "Countdown: " + diff + " sec";
+
+    },1000);
 }
 
 function addHistory(value){
@@ -169,7 +255,7 @@ function addHistory(value){
     list.innerHTML = "";
 
     historyArray.forEach(function(item){
-        list.innerHTML += "<div class='history-item'>" + item + "</div>";
+        list.innerHTML += "<div>"+item+"</div>";
     });
 }
 
