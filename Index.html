@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crash Style Big Graph</title>
+<title>Crash Calculator Pro</title>
 <style>
 body{
     background:#0f0f0f;
@@ -11,7 +12,6 @@ body{
     color:white;
     margin:0;
 }
-
 h2{ color:#00ff66; }
 
 input{
@@ -36,19 +36,26 @@ button{
 
 #graphContainer{
     width:100%;
-    height:300px; /* lehibe kokoa */
+    height:350px;
     background:#111;
     margin-top:20px;
     position:relative;
-    overflow:hidden;
 }
 
 #multiplier{
     font-size:50px;
     color:#00ff66;
     position:absolute;
-    top:40%;
+    top:35%;
     width:100%;
+}
+
+#finalTime{
+    position:absolute;
+    top:60%;
+    width:100%;
+    color:red;
+    font-size:18px;
 }
 
 canvas{
@@ -66,7 +73,7 @@ canvas{
 </head>
 <body>
 
-<h2>CRASH CALCULATOR</h2>
+<h2>CRASH CALCULATOR PRO</h2>
 
 <input id="hash" placeholder="Ampidiro HASH">
 <input id="heure" placeholder="Ampidiro Heure">
@@ -75,6 +82,7 @@ canvas{
 
 <div id="graphContainer">
     <div id="multiplier">0x</div>
+    <div id="finalTime"></div>
     <canvas id="graph"></canvas>
 </div>
 
@@ -88,7 +96,7 @@ canvas{
 let canvas = document.getElementById("graph");
 let ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
-canvas.height = 300;
+canvas.height = 350;
 
 let historyArray = [];
 
@@ -105,7 +113,15 @@ function startGame(){
     // ===== RESULTAT ANAKY 5 =====
     let total = hash.length + heure.length;
     let base = (total % 5) + 1;
-    let finalValue = base * 5;  // 5,10,15,20...
+    let finalValue = base * 5; // 5,10,15...
+
+    // ===== HEURE FINALE ESTIMEE =====
+    let now = new Date();
+    now.setSeconds(now.getSeconds() + finalValue * 2);
+    let finalHeure = now.toTimeString().split(" ")[0];
+
+    document.getElementById("finalTime").innerHTML =
+        "Heure Finale Estimée : " + finalHeure;
 
     let multiplierDisplay = document.getElementById("multiplier");
 
@@ -118,10 +134,10 @@ function startGame(){
 
     let interval = setInterval(function(){
 
-        current += 0.2;
-        x += 5;
+        current += 0.3;
+        x += 6;
 
-        let y = canvas.height - (current * 10);
+        let y = canvas.height - (current * 8);
 
         ctx.lineTo(x,y);
         ctx.strokeStyle = "#00ff66";
@@ -132,7 +148,11 @@ function startGame(){
         if(current >= finalValue){
             clearInterval(interval);
             multiplierDisplay.innerHTML = finalValue + "x";
-            addHistory(heure + " → " + finalValue + "x");
+
+            addHistory(
+                heure + " → " +
+                finalValue + "x (Crash @ " + finalHeure + ")"
+            );
         }
 
     },30);
