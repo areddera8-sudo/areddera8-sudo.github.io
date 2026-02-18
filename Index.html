@@ -2,176 +2,42 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Crash Calculator Pro</title>
+<title>Calculator Hash Heure</title>
 <style>
-body{
-    background:#0f0f0f;
-    font-family:Arial;
-    text-align:center;
-    color:white;
-    margin:0;
-}
-h2{ color:#00ff66; }
-
-input{
-    width:80%;
-    padding:12px;
-    margin:8px;
-    background:#1c1c1c;
-    border:1px solid #00ff66;
-    color:white;
-    border-radius:5px;
-}
-
-button{
-    width:85%;
-    padding:12px;
-    margin-top:10px;
-    background:#00ff66;
-    border:none;
-    font-weight:bold;
-    border-radius:5px;
-}
-
-#graphContainer{
-    width:100%;
-    height:350px;
-    background:#111;
-    margin-top:20px;
-    position:relative;
-}
-
-#multiplier{
-    font-size:50px;
-    color:#00ff66;
-    position:absolute;
-    top:35%;
-    width:100%;
-}
-
-#finalTime{
-    position:absolute;
-    top:60%;
-    width:100%;
-    color:red;
-    font-size:18px;
-}
-
-canvas{
-    position:absolute;
-    bottom:0;
-    left:0;
-}
-
-.history{
-    margin-top:20px;
-    background:#1c1c1c;
-    padding:10px;
-}
+body { font-family: Arial; text-align:center; background:#111; color:white; }
+input, button { padding:10px; margin:5px; width:80%; }
+button { background:lime; border:none; }
+.result { margin-top:20px; font-size:22px; color:yellow; }
 </style>
 </head>
 <body>
 
-<h2>CRASH CALCULATOR PRO</h2>
+<h2>Hash + Heure Calculator</h2>
 
 <input id="hash" placeholder="Ampidiro HASH">
-<input id="heure" placeholder="Ampidiro Heure">
+<input id="heure" placeholder="Ampidiro Heure (01:32:23)">
 
-<button onclick="startGame()">CALCULER</button>
+<button onclick="calculer()">CALCULER</button>
 
-<div id="graphContainer">
-    <div id="multiplier">0x</div>
-    <div id="finalTime"></div>
-    <canvas id="graph"></canvas>
-</div>
-
-<div class="history">
-    <h3 style="color:#00ff66;">Historique</h3>
-    <div id="historyList"></div>
-</div>
+<div class="result" id="resultat"></div>
 
 <script>
-
-let canvas = document.getElementById("graph");
-let ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = 350;
-
-let historyArray = [];
-
-function startGame(){
-
+function calculer(){
     let hash = document.getElementById("hash").value;
     let heure = document.getElementById("heure").value;
 
-    if(hash=="" || heure==""){
+    if(hash == "" || heure == ""){
         alert("Fenoy daholo!");
         return;
     }
 
-    // ===== RESULTAT ANAKY 5 =====
-    let total = hash.length + heure.length;
-    let base = (total % 5) + 1;
-    let finalValue = base * 5; // 5,10,15...
+    // Exemple formule tsotra (demo)
+    let valeur = hash.length + heure.length;
+    let resultat = (valeur % 10 + 1) + "." + (valeur % 99);
 
-    // ===== HEURE FINALE ESTIMEE =====
-    let now = new Date();
-    now.setSeconds(now.getSeconds() + finalValue * 2);
-    let finalHeure = now.toTimeString().split(" ")[0];
-
-    document.getElementById("finalTime").innerHTML =
-        "Heure Finale Estimée : " + finalHeure;
-
-    let multiplierDisplay = document.getElementById("multiplier");
-
-    let current = 0;
-    let x = 0;
-
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.beginPath();
-    ctx.moveTo(0, canvas.height);
-
-    let interval = setInterval(function(){
-
-        current += 0.3;
-        x += 6;
-
-        let y = canvas.height - (current * 8);
-
-        ctx.lineTo(x,y);
-        ctx.strokeStyle = "#00ff66";
-        ctx.stroke();
-
-        multiplierDisplay.innerHTML = current.toFixed(1) + "x";
-
-        if(current >= finalValue){
-            clearInterval(interval);
-            multiplierDisplay.innerHTML = finalValue + "x";
-
-            addHistory(
-                heure + " → " +
-                finalValue + "x (Crash @ " + finalHeure + ")"
-            );
-        }
-
-    },30);
+    document.getElementById("resultat").innerHTML = 
+    "RESULTAT FINAL : " + resultat + "x";
 }
-
-function addHistory(value){
-    historyArray.unshift(value);
-
-    if(historyArray.length > 10){
-        historyArray.pop();
-    }
-
-    let list = document.getElementById("historyList");
-    list.innerHTML = "";
-
-    historyArray.forEach(function(item){
-        list.innerHTML += "<div>"+item+"</div>";
-    });
-}
-
 </script>
 
 </body>
